@@ -1,0 +1,9 @@
+version: '2'
+services:
+  nginx:
+    image: opentracing/openresty
+    ports:
+    - 80:80
+    volumes:
+      - ./files/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf
+      - ./files/zipkin-config.json:/etc/zipkin-nginx/zipkin-config.json:ro

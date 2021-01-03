@@ -1,0 +1,35 @@
+load_module modules/ngx_http_opentracing_module.so;
+worker_processes  auto;
+
+error_log logs/error.log warn;
+
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    opentracing_load_tracer /usr/local/lib/libzipkin_opentracing_plugin.so /etc/zipkin-nginx/zipkin-config.json;
+    opentracing on;
+    opentracing_trace_locations off;
+
+    server {
+        listen 80;
+
+     location / {
+            
+                add_header traceid           $opentracing_context_x_b3_traceid;
+                add_header parentspanid      $opentracing_context_x_b3_parentspanid;
+                add_header currentSpanId     $opentracing_context_x_b3_spanid;
+
+            content_by_lua '
+                local bridge_tracer = require("opentracing_bridge_tracer")
+                local tracer = bridge_tracer.new_from_global()
+                local parent_context = tracer:http_headers_extract(ngx.req.get_headers())
+                local span = tracer:start_span("lua-hello", {"startTime", 1609558363})
+                span:finish()
+            ';
+
+        }
+    }
+}

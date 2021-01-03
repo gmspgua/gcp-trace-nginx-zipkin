@@ -1,0 +1,5 @@
+{
+  "service_name": "zipkin-nginx",
+  "collector_host": "host.docker.internal",
+  "collector_port": 9411
+}
